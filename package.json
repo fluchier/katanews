@@ -1,0 +1,42 @@
+{
+  "name": "katanews",
+  "version": "1.0.0",
+  "description": "Katane Web Services",
+  "main": "server.js",
+  "dependencies": {
+    "bcrypt-nodejs": "latest",
+    "body-parser": "~1.15.1",
+    "connect-flash": "~0.1.1",
+    "cookie-parser": "~1.4.1",
+    "ejs": "^2.4.1",
+    "express": "^4.13.4",
+    "express-session": "~1.13.0",
+    "jsonwebtoken": "^6.2.0",
+    "mongoose": "^4.4.15",
+    "morgan": "^1.7.0",
+    "passport": "~0.3.2",
+    "passport-facebook": "~2.1.0",
+    "passport-google-oauth": "~1.0.0",
+    "passport-local": "~1.0.0",
+    "passport-twitter": "~1.0.4",
+    "serve-favicon": "^2.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fluchier/katanews.git"
+  },
+  "keywords": [
+    "Catane",
+    "Settlers"
+  ],
+  "author": "Florian Luchier",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fluchier/katanews/issues"
+  },
+  "homepage": "https://github.com/fluchier/katanews"
+}

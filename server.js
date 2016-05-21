@@ -117,12 +117,6 @@ var apiRoutes = express.Router();
         } else {
           // if everything is good, save to request for use in other routes
           req.decoded = decoded;  
-
-          // get user
-         /* User.findOne({ _id: decoded.iss }, function(err, user) {
-            req.user = user;
-          });*/
-
           next();
         }
       });
@@ -144,8 +138,25 @@ var apiRoutes = express.Router();
   // get games
   apiRoutes.get('/games', function (req, res) {
     Game.find({}, function(err, games) {
-      res.json(games);
+      if (games)
+        res.json({success: true, games: games});
+      else
+        return res.status(403).send({ 
+          success: false, 
+          message: 'No game found' 
+        });
     });
+  });
+
+  // delete ALL GAMES TODO: protect
+  apiRoutes.delete('/games/', function (req, res) {
+    Game.remove({}, function (err) {
+      if (err) { throw err; }
+        res.json({
+          success: true,
+          message: 'All games deleted.'
+        }); 
+      });
   });
 
   // new game
@@ -196,7 +207,6 @@ var apiRoutes = express.Router();
             message: 'Are you lost?' 
           });
         }
-        console.log(game);
         var command = req.body.command.toLowerCase();
         switch (command) {
           case "addplayer":
@@ -230,13 +240,23 @@ var apiRoutes = express.Router();
             case "cancelgame":
               // check if command is allowed
               checkCommand(game, "cancelgame");
-              //res.redirect("/api/game")
-              Game.remove({ _id : game._id }, function (err) {
-                if (err) { throw err; }
-                  res.json({
-                    success: true,
-                    message: 'Game deleted.'
-                  }); 
+              // cancel is possible only if the logged user is the alone player in game
+              console.log(game.players.length);
+              console.log("-"+game.players[0].id+"-");
+              console.log("-"+req.decoded.$__.scope._id+"-");
+              if (game.players.length===1 && game.players[0].id==req.decoded.$__.scope._id)
+                //res.redirect("/api/game")
+                Game.remove({ _id : game._id }, function (err) {
+                  if (err) { throw err; }
+                    res.json({
+                      success: true,
+                      message: 'Game deleted.'
+                    }); 
+                  });
+              else
+                return res.status(403).send({ 
+                  success: false, 
+                  message: 'You have not the right to cancel this game.' 
                 });
               break;
           case "removeplayer":
@@ -246,7 +266,7 @@ var apiRoutes = express.Router();
               if (command===allowedCommand.name.toLowerCase()) {allowed = true;}
             });
             if (!allowed) 
-              return res.status(403).send({ 
+              return res.status(405).send({ 
                 success: false, 
                 message: 'Command non allowed.' 
               });
@@ -307,7 +327,7 @@ var apiRoutes = express.Router();
    });
   });
 
-  // delete game TEMP FOT DEV TODO: protect
+  // delete user TODO: protect
   apiRoutes.delete('/user/:id', function (req, res) {
     User.remove({ _id : req.params.id }, function (err) {
       if (err) { throw err; }

@@ -14,7 +14,13 @@
 		"3b1d6cd6-5837-0f93-fb6f-67fa4e9871eb",
 		"7bd19936-bb44-395e-8de9-bfe67fdeda2f",
 		"66f6988e-7d57-cf5a-d727-55cd2747621d",
-		"f7d9ead2-966b-2494-58fa-a17c63c215c9"
+		"f7d9ead2-966b-2494-58fa-a17c63c215c9",
+		"5d3cb83d-f1dc-4737-e62c-027f0be5bb16",
+		"c58c4162-1a75-6e43-ba11-b7a3ad3a7d71",
+		"8f748060-90b7-5bf3-1c3a-1638e3d4e334",
+		"e059d075-cdfe-307d-3c62-cb73ee06228c",
+		"971de7a4-8a0a-4c06-748e-fdee5054c1f4",
+		"c59898d3-9306-fa9f-52c4-6d2bc13f611a"
 	],
 	"folders": [],
 	"timestamp": 1463507084854,
@@ -42,7 +48,7 @@
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1463758220064,
-			"name": "API - users",
+			"name": "API - users (200)",
 			"description": "",
 			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
 			"responses": []
@@ -61,7 +67,7 @@
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1463758130372,
-			"name": "API - new game",
+			"name": "free.fr => new game (200)",
 			"description": "",
 			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
 			"responses": []
@@ -86,7 +92,7 @@
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1463760211522,
-			"name": "API - rename user with 'test'",
+			"name": "free.fr => rename with  'test' (200)",
 			"description": "",
 			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
 			"responses": []
@@ -112,7 +118,38 @@
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1463757817763,
-			"name": "API - cancel game",
+			"name": "free.fr => cancel game (200)",
+			"description": "",
+			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
+			"responses": []
+		},
+		{
+			"id": "5d3cb83d-f1dc-4737-e62c-027f0be5bb16",
+			"headers": "",
+			"url": "http://localhost:8080/api/authenticate",
+			"preRequestScript": null,
+			"pathVariables": {},
+			"method": "POST",
+			"data": [
+				{
+					"key": "email",
+					"value": "florian.luchier@gmail.com",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "password",
+					"value": "floflo",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"tests": "postman.clearGlobalVariable(\"token2\");\npostman.clearGlobalVariable(\"user2ID\");\nvar JSONresponse;\ntry {\n   tests[\"Content-Type is present\"] = responseHeaders.hasOwnProperty(\"Content-Type\");\n   tests[\"Content-Type is application/json\"] = responseHeaders[\"Content-Type\"].indexOf(\"application/json\") > -1;\n  \n   tests[\"Status code is 200\"] = responseCode.code === 200;\n   JSONresponse = JSON.parse(responseBody);\n   \n   tests[\"success is present\"] = JSONresponse.hasOwnProperty(\"success\");\n   tests[\"Success is true\"] = JSONresponse.success;\n   \n   tests[\"yourID is present\"] = JSONresponse.hasOwnProperty(\"yourID\");\n   postman.setGlobalVariable(\"user2ID\", JSONresponse.yourID); \n   \n   tests[\"token is present\"] = JSONresponse.hasOwnProperty(\"token\");\n   postman.setGlobalVariable(\"token2\", JSONresponse.token); \n}\ncatch (e) {}\n\n\n",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1463815676691,
+			"name": "gmail => authenticate (200)",
 			"description": "",
 			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
 			"responses": []
@@ -137,7 +174,7 @@
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1463760063988,
-			"name": "API - rename user with 'free.fr'",
+			"name": "test => rename with  'free.fr' (200)",
 			"description": "",
 			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
 			"responses": []
@@ -162,7 +199,52 @@
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1463760300642,
-			"name": "API - rename user with 'test'",
+			"name": "test => rename with  'test' (403)",
+			"description": "",
+			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
+			"responses": []
+		},
+		{
+			"id": "8f748060-90b7-5bf3-1c3a-1638e3d4e334",
+			"headers": "x-access-token: {{token2}}\n",
+			"url": "http://localhost:8080/api/game",
+			"preRequestScript": null,
+			"pathVariables": {},
+			"method": "POST",
+			"data": null,
+			"dataMode": "params",
+			"version": 2,
+			"tests": "postman.clearGlobalVariable(\"gameID\");\nvar JSONresponse;\ntry {\n   tests[\"Content-Type is present\"] = responseHeaders.hasOwnProperty(\"Content-Type\");\n   tests[\"Content-Type is application/json\"] = responseHeaders[\"Content-Type\"].indexOf(\"application/json\") > -1;\n   \n   tests[\"Status code is 200\"] = responseCode.code === 200;\n   JSONresponse = JSON.parse(responseBody);\n   \n   tests[\"success is present\"] = JSONresponse.hasOwnProperty(\"success\");\n   tests[\"Success is true\"] = JSONresponse.success;\n   \n   tests[\"game is present\"] = JSONresponse.hasOwnProperty(\"game\");\n   var game = JSONresponse.game;\n   tests[\"_id is present\"] = game.hasOwnProperty(\"_id\");\n   postman.setGlobalVariable(\"gameID\", game._id); \n \n}\ncatch (e) {}\n",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1463815694788,
+			"name": "API - new game (200)",
+			"description": "",
+			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
+			"responses": []
+		},
+		{
+			"id": "971de7a4-8a0a-4c06-748e-fdee5054c1f4",
+			"headers": "x-access-token: {{token}}\n",
+			"url": "http://localhost:8080/api/game/{{gameID}}",
+			"preRequestScript": null,
+			"pathVariables": {},
+			"method": "PUT",
+			"data": [
+				{
+					"key": "command",
+					"value": "cancelGame",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"version": 2,
+			"tests": "var JSONresponse;\ntry {\n   tests[\"Content-Type is present\"] = responseHeaders.hasOwnProperty(\"Content-Type\");\n   tests[\"Content-Type is application/json\"] = responseHeaders[\"Content-Type\"].indexOf(\"application/json\") > -1;\n   \n   tests[\"Status code is 403\"] = responseCode.code === 403;\n   JSONresponse = JSON.parse(responseBody);\n   \n   tests[\"success is present\"] = JSONresponse.hasOwnProperty(\"success\");\n   tests[\"Success is false\"] = !JSONresponse.success;\n   \n   tests[\"message is present\"] = JSONresponse.hasOwnProperty(\"message\");\n   tests[\"Message is 'You have not the right to cancel this game.'\"] = JSONresponse.message === \"You have not the right to cancel this game.\";\n}\ncatch (e) {}\n",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1463819514936,
+			"name": "free.fr => cancel game (403)",
 			"description": "",
 			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
 			"responses": []
@@ -181,7 +263,7 @@
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1463755216435,
-			"name": "API - users - Without token",
+			"name": "API - users - Without token (403)",
 			"description": "",
 			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
 			"responses": []
@@ -199,7 +281,7 @@
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1463753898563,
-			"name": "API - users - With bad token",
+			"name": "API - users - With bad token (403)",
 			"description": "",
 			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
 			"responses": []
@@ -230,7 +312,51 @@
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1463757857146,
-			"name": "API - authenticate - florian.luchier@free.fr",
+			"name": "free.fr => authenticate (200)",
+			"description": "",
+			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
+			"responses": []
+		},
+		{
+			"id": "c58c4162-1a75-6e43-ba11-b7a3ad3a7d71",
+			"headers": "x-access-token: {{token2}}\n",
+			"url": "http://localhost:8080/api/user/{{userID}}",
+			"preRequestScript": null,
+			"pathVariables": {},
+			"method": "PUT",
+			"data": [
+				{
+					"key": "username",
+					"value": "gmail",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"tests": "postman.clearGlobalVariable(\"username\");\nvar JSONresponse;\ntry {\n   tests[\"Content-Type is present\"] = responseHeaders.hasOwnProperty(\"Content-Type\");\n   tests[\"Content-Type is application/json\"] = responseHeaders[\"Content-Type\"].indexOf(\"application/json\") > -1;\n  \n   tests[\"Status code is 403\"] = responseCode.code === 403;\n   \n   JSONresponse = JSON.parse(responseBody);\n   tests[\"Success is false\"] = !JSONresponse.false;\n   \n   tests[\"message is present\"] = JSONresponse.hasOwnProperty(\"message\");\n   tests[\"message is 'You have not the right to modify another user.'\"] = JSONresponse.message === \"You have not the right to modify another user.\";\n}\ncatch (e) {}\n\n\n",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1463815687516,
+			"name": "gmail - rename free.fr with 'test' (403)",
+			"description": "",
+			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
+			"responses": []
+		},
+		{
+			"id": "c59898d3-9306-fa9f-52c4-6d2bc13f611a",
+			"headers": "x-access-token: {{token2}}\n",
+			"url": "http://localhost:8080/api/games",
+			"preRequestScript": null,
+			"pathVariables": {},
+			"method": "DELETE",
+			"data": null,
+			"dataMode": "params",
+			"version": 2,
+			"tests": "var JSONresponse;\ntry {\n   tests[\"Content-Type is present\"] = responseHeaders.hasOwnProperty(\"Content-Type\");\n   tests[\"Content-Type is application/json\"] = responseHeaders[\"Content-Type\"].indexOf(\"application/json\") > -1;\n   \n   tests[\"Status code is 200\"] = responseCode.code === 200;\n   JSONresponse = JSON.parse(responseBody);\n   \n   tests[\"success is present\"] = JSONresponse.hasOwnProperty(\"success\");\n   tests[\"Success is true\"] = JSONresponse.success;\n   \n   tests[\"message is present\"] = JSONresponse.hasOwnProperty(\"message\");\n   tests[\"Message is 'All games deleted.'\"] = JSONresponse.message === \"All games deleted.\";\n   \n   postman.clearGlobalVariable(\"gameID\"); \n}\ncatch (e) {}\n",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1463818578899,
+			"name": "free.fr => delete ALL games (200)",
 			"description": "",
 			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
 			"responses": []
@@ -249,7 +375,7 @@
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1463758051889,
-			"name": "API - new game",
+			"name": "free.fr => new game (200)",
 			"description": "",
 			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
 			"responses": []
@@ -267,8 +393,27 @@
 			"tests": "var JSONresponse;\ntry {\n   tests[\"Content-Type is present\"] = responseHeaders.hasOwnProperty(\"Content-Type\");\n   tests[\"Content-Type is application/json\"] = responseHeaders[\"Content-Type\"].indexOf(\"application/json\") > -1;\n   \n   tests[\"Status code is 200\"] = responseCode.code === 200;\n   JSONresponse = JSON.parse(responseBody);\n   \n   tests[\"success is present\"] = JSONresponse.hasOwnProperty(\"success\");\n   tests[\"Success is true\"] = JSONresponse.success;\n   \n   tests[\"message is present\"] = JSONresponse.hasOwnProperty(\"message\");\n   tests[\"Message is 'Game deleted.'\"] = JSONresponse.message === \"Game deleted.\";\n   \n   postman.clearGlobalVariable(\"gameID\"); \n}\ncatch (e) {}\n",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1463757746868,
-			"name": "API - delete game",
+			"time": 1463818542910,
+			"name": "free.fr => delete game (200)",
+			"description": "",
+			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
+			"responses": []
+		},
+		{
+			"id": "e059d075-cdfe-307d-3c62-cb73ee06228c",
+			"headers": "x-access-token: {{token2}}\n",
+			"url": "http://localhost:8080/api/games",
+			"preRequestScript": null,
+			"pathVariables": {},
+			"method": "GET",
+			"data": null,
+			"dataMode": "params",
+			"version": 2,
+			"tests": "var JSONresponse;\ntry {\n   tests[\"Content-Type is present\"] = responseHeaders.hasOwnProperty(\"Content-Type\");\n   tests[\"Content-Type is application/json\"] = responseHeaders[\"Content-Type\"].indexOf(\"application/json\") > -1;\n   \n   tests[\"Status code is 200\"] = responseCode.code === 200;\n   JSONresponse = JSON.parse(responseBody);\n   \n   tests[\"success is present\"] = JSONresponse.hasOwnProperty(\"success\");\n   tests[\"Success is true\"] = JSONresponse.success;\n   \n   tests[\"games is present\"] = JSONresponse.hasOwnProperty(\"games\");\n   var games = JSONresponse.games;\n   tests[\"games is not empty\"] = games.length > 0;\n \n}\ncatch (e) {}\n",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1463819534850,
+			"name": "API - games (200)",
 			"description": "",
 			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
 			"responses": []
@@ -283,17 +428,17 @@
 			"data": [
 				{
 					"key": "username",
-					"value": "iLuch",
+					"value": "gmail",
 					"type": "text",
 					"enabled": true
 				}
 			],
 			"dataMode": "urlencoded",
-			"tests": "postman.clearGlobalVariable(\"username\");\nvar JSONresponse;\ntry {\n   tests[\"Content-Type is present\"] = responseHeaders.hasOwnProperty(\"Content-Type\");\n   tests[\"Content-Type is application/json\"] = responseHeaders[\"Content-Type\"].indexOf(\"application/json\") > -1;\n  \n   tests[\"Status code is 403\"] = responseCode.code === 403;\n   \n   JSONresponse = JSON.parse(responseBody);\n   tests[\"Success is false\"] = !JSONresponse.false;\n   \n   tests[\"message is present\"] = JSONresponse.hasOwnProperty(\"message\");\n   tests[\"message is 'Username iLuch already exists.'\"] = JSONresponse.message === \"Username iLuch already exists.\";\n}\ncatch (e) {}\n\n\n",
+			"tests": "postman.clearGlobalVariable(\"username\");\nvar JSONresponse;\ntry {\n   tests[\"Content-Type is present\"] = responseHeaders.hasOwnProperty(\"Content-Type\");\n   tests[\"Content-Type is application/json\"] = responseHeaders[\"Content-Type\"].indexOf(\"application/json\") > -1;\n  \n   tests[\"Status code is 403\"] = responseCode.code === 403;\n   \n   JSONresponse = JSON.parse(responseBody);\n   tests[\"Success is false\"] = !JSONresponse.false;\n   \n   tests[\"message is present\"] = JSONresponse.hasOwnProperty(\"message\");\n   tests[\"message is 'Username gmail already exists.'\"] = JSONresponse.message === \"Username gmail already exists.\";\n}\ncatch (e) {}\n\n\n",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1463760504254,
-			"name": "API - rename user with existing username",
+			"time": 1463787759506,
+			"name": "free.fr => rename with  existing username  (403)",
 			"description": "",
 			"collectionId": "39e6e383-a437-d839-abab-c0f65cee375a",
 			"responses": []

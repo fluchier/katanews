@@ -307,6 +307,17 @@ var apiRoutes = express.Router();
    });
   });
 
+  // delete game TEMP FOT DEV TODO: protect
+  apiRoutes.delete('/user/:id', function (req, res) {
+    User.remove({ _id : req.params.id }, function (err) {
+      if (err) { throw err; }
+        res.json({
+          success: true,
+          message: 'User deleted.'
+        }); 
+      });
+  });
+
   // update user
   apiRoutes.put('/user/:id', function (req, res) {
 
@@ -314,6 +325,12 @@ var apiRoutes = express.Router();
       return res.status(403).send({ 
         success: false, 
         message: 'Incorrect fieldname.' 
+      });
+
+    if (req.params.id != req.decoded.$__.scope._id)
+      return res.status(403).send({ 
+        success: false, 
+        message: 'You have not the right to modify another user.' 
       });
 
     var next = function() {
@@ -333,21 +350,17 @@ var apiRoutes = express.Router();
 
     User.findOne({"local.username": req.body.username}, function (err, user) {
       if (err) { throw err; }
-      console.log("logged.id: -"+req.decoded.$__.scope._id+"-");
-      if (user && user._id !== req.decoded.$__.scope._id) {
-        console.log("user.id:  -"+user._id+"-");
-        if (user._id == req.decoded.$__.scope._id) {
+      if (user) {
+        if (user._id == req.decoded.$__.scope._id)
           return res.status(403).send({ 
             success: false, 
             message: 'User not updated: sended username and saved username are equals.'
           });
-        }
-        else {
+        else 
           return res.status(403).send({ 
             success: false, 
             message: 'Username '+req.body.username+' already exists.'
           });
-        }
       }
       else next();
     });

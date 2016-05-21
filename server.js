@@ -166,8 +166,8 @@ var apiRoutes = express.Router();
       name: 'Les colons de Catane',
       startDate: new Date(),
       players: [{ id: req.decoded.$__.scope._id, username: "Player 1" }],
-      status: { code: 1, shortname: "waiting-new-player", description: "Waiting new player" },
-      nextCommands: [{name: "addPlayer"}, {name: "cancelGame"}]
+      status: { code: 1, shortname: "waiting-new-player", description: "Waiting new player…" },
+      nextCommands: [{name: "joinGame"}, {name: "cancelGame"}]
     });
     game.save(function (err) {
       if (err) { throw err; }
@@ -209,7 +209,7 @@ var apiRoutes = express.Router();
         }
         var command = req.body.command.toLowerCase();
         switch (command) {
-          case "addplayer":
+          case "joinGame":
             // check if command is allowed
             checkCommand(game, "addPlayer");
             // check if player is not already registered

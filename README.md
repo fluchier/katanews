@@ -142,8 +142,8 @@ Response (200):
 	    }
 	  ],
 	  nextCommands: [
-	    { name: 'addPlayer' },
-	    { name: 'cancelGame' }
+	    { name: 'joinGame' },
+	    { name: 'quitGame' }
 	  ],
 	  status: {
 	    code: 1,
@@ -157,28 +157,31 @@ Response (200):
 Response (200):
 
 	{
-	  name: 'Les colons de Catane',
-	  startDate: '2016-05-20T12:15:10.478Z',
-	  _id: 'GAME_ID',
-	  options: [],
-	  players: [
-	    {
-	      id: 'PLAYER_1_ID',
-	      username: 'toto',
-	    },
-	    {
-	      id: 'PLAYER_2_ID',
-	      username: 'toto',
+	  sucsess: true,
+	  game : {
+	    name: 'Les colons de Catane',
+	    startDate: '2016-05-20T12:15:10.478Z',
+	    _id: 'GAME_ID',
+	    options: [],
+	    players: [
+	      {
+	        id: 'PLAYER_1_ID',
+	        username: 'toto 1',
+	      },
+	      {
+	        id: 'PLAYER_2_ID',
+	        username: 'toto 2',
+	      }
+	    ],
+	    nextCommands: [
+	      { name: 'addPlayer' },
+	      { name: 'quitGame' }
+	    ],
+	    status: {
+	      code: 1,
+	      shortname: 'waiting-new-player',
+	      description: 'Waiting new player'
 	    }
-	  ],
-	  nextCommands: [
-	    { name: 'addPlayer' },
-	    { name: 'quitGame' }
-	  ],
-	  status: {
-	    code: 1,
-	    shortname: 'waiting-new-player',
-	    description: 'Waiting new player'
 	  }
 	}
 
@@ -195,9 +198,9 @@ Response (200):
 
 	TODO
 	
-##### Add player
+##### Join game
 
-command = 'addplayer'
+command = 'joinGame'
 
 Response (200):
 

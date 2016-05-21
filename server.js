@@ -161,18 +161,24 @@ var apiRoutes = express.Router();
 
   // new game
   apiRoutes.post('/game', function (req, res) {
-    console.log(req.decoded.$__.scope._id);
-    var game = new Game({ 
-      name: 'Les colons de Catane',
-      startDate: new Date(),
-      players: [{ id: req.decoded.$__.scope._id, username: "Player 1" }],
-      status: { code: 1, shortname: "waiting-new-player", description: "Waiting new player…" },
-      nextCommands: [{name: "joinGame"}, {name: "cancelGame"}]
+
+    User.findById(req.params.id, 'local.username', function (err, user) {
+      //if (err) { throw err; };
+      console.log(user);
+      var username = user && user.local && user.local.username ? user.local.username : "Player 1";
+      var game = new Game({ 
+        name: 'Les colons de Catane',
+        startDate: new Date(),
+        players: [{ id: req.decoded.$__.scope._id, username: username}],
+        status: { code: 1, shortname: "waiting-new-player", description: "Waiting new player…" },
+        nextCommands: [{name: "joinGame"}, {name: "cancelGame"}]
+      });
+      game.save(function (err) {
+        if (err) { throw err; }
+        res.json({success: true, game: game});
+      });
     });
-    game.save(function (err) {
-      if (err) { throw err; }
-      res.json({success: true, game: game});
-    });
+
   });
 
   // get game
@@ -201,17 +207,16 @@ var apiRoutes = express.Router();
 
       // get game
       Game.findById(req.params.id, function (err, game) {
-        if (err) { 
+        if (err) 
           return res.status(405).send({ 
             success: false, 
             message: 'Are you lost?' 
           });
-        }
         var command = req.body.command.toLowerCase();
         switch (command) {
-          case "joinGame":
+          case "joingame":
             // check if command is allowed
-            checkCommand(game, "addPlayer");
+            checkCommand(game, "joingame");
             // check if player is not already registered
             game.players.forEach(function(player) { 
               if (player.id===req.decoded.$__.scope._id) {
@@ -233,55 +238,49 @@ var apiRoutes = express.Router();
                   if (err) { throw err; }
                   Game.findById(req.params.id, function (err, game) {
                     if (err) { throw err; }
-                    res.json(game);
+                    res.json({success: true, game: game});
                   });
             });
             break;
-            case "cancelgame":
+            case "quitgame":
               // check if command is allowed
               checkCommand(game, "cancelgame");
               // cancel is possible only if the logged user is the alone player in game
               console.log(game.players.length);
               console.log("-"+game.players[0].id+"-");
               console.log("-"+req.decoded.$__.scope._id+"-");
-              if (game.players.length===1 && game.players[0].id==req.decoded.$__.scope._id)
-                //res.redirect("/api/game")
-                Game.remove({ _id : game._id }, function (err) {
-                  if (err) { throw err; }
-                    res.json({
-                      success: true,
-                      message: 'Game deleted.'
-                    }); 
-                  });
-              else
-                return res.status(403).send({ 
-                  success: false, 
-                  message: 'You have not the right to cancel this game.' 
-                });
-              break;
-          case "removeplayer":
-            // check if command is allowed
-            var allowed = false;
-            game.nextCommands.forEach(function(allowedCommand) { 
-              if (command===allowedCommand.name.toLowerCase()) {allowed = true;}
-            });
-            if (!allowed) 
-              return res.status(405).send({ 
-                success: false, 
-                message: 'Command non allowed.' 
-              });
-            // check if player is not already registered
-            game.players.forEach(function(player) { 
-              if (player.id===req.decoded.$__.scope._id) {
-                return res.status(403).send({ 
-                  success: false, 
-                  message: 'Player already registered as '+player.username+'.'
-                });
+
+              if (game.players.length===1) // if only one player…
+                if (game.players[0].id==req.decoded.$__.scope._id) // …and if he's requester
+                  // delete game
+                  //res.redirect("/api/game")
+                  Game.remove({ _id : game._id }, function (err) {
+                    if (err) { throw err; }
+                      res.json({
+                        success: true,
+                        message: 'Game deleted.'
+                      }); 
+                    });
+              else { // if more than one player
+                // check if player is registred in the game
+                for (var t=1; t<game.players.length; t++) {
+                  var player = game.players[t];
+                  if (game.players[t].id==req.decoded.$__.scope._id)
+                    game.update(
+                      { _id : game._id }, 
+                      { $pull: {players : { id : req.decoded.$__.scope._id }} },
+                      { safe: true },
+                      function (err, obj) {
+                          ...
+                      });
+                }
               }
-            });
-            // remove player
-            //TODO
-            break;
+              // else the player is not in the game
+              return res.status(403).send({ 
+                success: false, 
+                message: 'You are not in this game!' 
+              });
+              break;
           default:
             return res.status(403).send({ 
               success: false, 
@@ -302,7 +301,12 @@ var apiRoutes = express.Router();
   // delete game
   apiRoutes.delete('/game/:id', function (req, res) {
     Game.remove({ _id : req.params.id }, function (err) {
-      if (err) { throw err; }
+      if (err)
+        return res.status(403).send({ 
+          success: false, 
+          message: 'Game not deleted.' 
+        });
+      else
         res.json({
           success: true,
           message: 'Game deleted.'
@@ -330,12 +334,16 @@ var apiRoutes = express.Router();
   // delete user TODO: protect
   apiRoutes.delete('/user/:id', function (req, res) {
     User.remove({ _id : req.params.id }, function (err) {
-      if (err) { throw err; }
-        res.json({
-          success: true,
-          message: 'User deleted.'
-        }); 
-      });
+      if (err) 
+        return res.status(403).send({ 
+          success: false, 
+          message: 'User not deleted: an error occurs.' 
+        });
+      res.json({
+        success: true,
+        message: 'User deleted.'
+      }); 
+    });
   });
 
   // update user
@@ -355,7 +363,11 @@ var apiRoutes = express.Router();
 
     var next = function() {
       User.update({_id: req.params.id}, {"local.username": req.body.username}, function (err, result) {
-        if (err) { throw err; }; 
+        if (err) 
+          return res.status(403).send({ 
+            success: false, 
+            message: 'User not updated: an error occurs.' 
+          });
         if (result && result.ok===1 && result.n===1 /*&& result.nModified===1*/)
           return res.send({ 
             success: true, 
@@ -369,7 +381,11 @@ var apiRoutes = express.Router();
     }
 
     User.findOne({"local.username": req.body.username}, function (err, user) {
-      if (err) { throw err; }
+      if (err)
+        return res.status(403).send({ 
+          success: false, 
+          message: 'User not updated: an error occurs.'
+        });
       if (user) {
         if (user._id == req.decoded.$__.scope._id)
           return res.status(403).send({ 

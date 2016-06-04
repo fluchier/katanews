@@ -70,7 +70,7 @@ var apiRoutes = express.Router();
         "local.email": req.body.email
     }, function(err, user) {
         
-      if (err) throw err;
+      //if (err) throw err;
 
       if (!user || !user.validPassword(req.body.password)) {
         res.json({ success: false, message: 'Authentication failed. User/password not found.' });
@@ -151,7 +151,7 @@ var apiRoutes = express.Router();
   // delete ALL GAMES TODO: protect
   apiRoutes.delete('/games/', function (req, res) {
     Game.remove({}, function (err) {
-      if (err) { throw err; }
+      //if (err) { throw err; }
         res.json({
           success: true,
           message: 'All games deleted.'
@@ -174,7 +174,7 @@ var apiRoutes = express.Router();
         nextCommands: [{name: "joinGame"}, {name: "cancelGame"}]
       });
       game.save(function (err) {
-        if (err) { throw err; }
+        //if (err) { throw err; }
         res.json({success: true, game: game});
       });
     });
@@ -184,13 +184,19 @@ var apiRoutes = express.Router();
   // get game
   apiRoutes.get('/game/:id', function (req, res) {
     Game.findById(req.params.id, function (err, game) {
-      if (err) { throw err; }
+      //if (err) { throw err; }
       res.json(game);
     });
   });
 
   // update game
   apiRoutes.put('/game/:id', function (req, res) {
+
+    if (req.body.command==null || typeof(req.body.command) == 'undefined')
+      return res.status(403).send({ 
+        success: false, 
+        message: 'Missed command.' 
+      });
 
     var checkCommand = function (game, command) {
       var allowed = false;
@@ -203,99 +209,117 @@ var apiRoutes = express.Router();
           message: 'Command non allowed.' 
         });
     };
-    if (req.body.command) {
 
-      // get game
-      Game.findById(req.params.id, function (err, game) {
-        if (err) 
-          return res.status(405).send({ 
-            success: false, 
-            message: 'Are you lost?' 
-          });
-        var command = req.body.command.toLowerCase();
-        switch (command) {
-          case "joingame":
-            // check if command is allowed
-            checkCommand(game, "joingame");
-            // check if player is not already registered
-            game.players.forEach(function(player) { 
-              if (player.id===req.decoded.$__.scope._id) {
-                return res.status(403).send({ 
-                  success: false, 
-                  message: 'Player already registered as '+player.username+'.'
-                });
-              }
-            });
-            // add player
-            Game.update({_id: game._id}, {
-                $pushAll: {
-                  players:[
-                    {id: req.decoded.$__.scope._id, username: req.body.username}
-                  ]
-                }}, 
-                {upsert:true},
-                function(err, result){
-                  if (err) { throw err; }
-                  Game.findById(req.params.id, function (err, game) {
-                    if (err) { throw err; }
-                    res.json({success: true, game: game});
-                  });
-            });
-            break;
-            case "quitgame":
-              // check if command is allowed
-              checkCommand(game, "cancelgame");
-              // cancel is possible only if the logged user is the alone player in game
-              console.log(game.players.length);
-              console.log("-"+game.players[0].id+"-");
-              console.log("-"+req.decoded.$__.scope._id+"-");
-
-              if (game.players.length===1) // if only one player…
-                if (game.players[0].id==req.decoded.$__.scope._id) // …and if he's requester
-                  // delete game
-                  //res.redirect("/api/game")
-                  Game.remove({ _id : game._id }, function (err) {
-                    if (err) { throw err; }
-                      res.json({
-                        success: true,
-                        message: 'Game deleted.'
-                      }); 
-                    });
-              else { // if more than one player
-                // check if player is registred in the game
-                for (var t=1; t<game.players.length; t++) {
-                  var player = game.players[t];
-                  if (game.players[t].id==req.decoded.$__.scope._id)
-                    game.update(
-                      { _id : game._id }, 
-                      { $pull: {players : { id : req.decoded.$__.scope._id }} },
-                      { safe: true },
-                      function (err, obj) {
-                          ...
-                      });
-                }
-              }
-              // else the player is not in the game
-              return res.status(403).send({ 
-                success: false, 
-                message: 'You are not in this game!' 
-              });
-              break;
-          default:
+    // get game
+    Game.findById(req.params.id, function (err, game) {
+      if (err) 
+        return res.status(405).send({ 
+          success: false, 
+          message: 'Are you lost?' 
+        });
+      // check if player is not already registered
+      var playerAlreadyInGame = false;
+      game.players.forEach(function(player) { 
+        if (player.id===req.decoded.$__.scope._id) {
+          playerAlreadyInGame = true;
+        }
+      });
+      var command = req.body.command.toLowerCase();
+      switch (command) {
+        case "joingame":
+          // check if command is allowed
+          checkCommand(game, "joingame");
+          // check if player in not already registred in the game
+          if (playerAlreadyInGame)
             return res.status(403).send({ 
               success: false, 
-              message: 'Unknown command.' 
+              message: 'Player already registered as '+player.username+'.'
             });
-        }
-
-      });
-    }
-    else {
-      return res.status(403).send({ 
-        success: false, 
-        message: 'Missed command.' 
-      });
-    }
+          // add player
+          Game.update({_id: game._id}, 
+            {
+              $pushAll: {
+                players:[
+                  {id: req.decoded.$__.scope._id, username: req.body.username}
+                ]
+              }
+            }, 
+            {upsert:true},
+            function(err, result) {
+              if (err) 
+                return res.status(403).send({ 
+                  success: false, 
+                  message: 'An error occured.' 
+                });
+              Game.findById(req.params.id, function (err, game) {
+                if (err)
+                  return res.status(403).send({ 
+                    success: false, 
+                    message: 'An error occured.' 
+                  });
+                res.json({success: true, game: game});
+              });
+            }
+          );
+          break;
+        case "quitgame":
+          // check if command is allowed
+          checkCommand(game, "cancelgame");
+          // check if player in not already registred in the game
+          if (!playerAlreadyInGame)
+            return res.status(403).send({ 
+              success: false, 
+              message: 'You are not in this game!'
+            });
+          // cancel is possible only if the logged user is the alone player in game
+          if (game.players.length===1) // if only one player…
+            if (game.players[0].id==req.decoded.$__.scope._id) {// …and if he's requester
+              // delete game
+              //res.redirect("/api/game")
+              Game.remove({ _id : game._id }, function (err) {
+                if (err)
+                  return res.status(403).send({ 
+                    success: false, 
+                    message: 'Game not deleted: an error occured.' 
+                  });
+                res.json({
+                  success: true,
+                  message: 'Game deleted.'
+                }); 
+              });
+            }
+            else { // if more than one player
+              // check if player is registred in the game
+              /*for (var t=1; t<game.players.length; t++) {
+                var player = game.players[t];
+                if (game.players[t].id==req.decoded.$__.scope._id)
+                  game.update(
+                    { _id : game._id }, 
+                    { $pull: {players : { id : req.decoded.$__.scope._id }} },
+                    { safe: true },
+                    function (err) {
+                      if (err)
+                        return res.status(403).send({ 
+                          success: false, 
+                          message: 'You did not leave the game an error occured.' 
+                        });
+                      else
+                        res.json({
+                          success: true,
+                          message: 'You left the game.'
+                        }); 
+                    }
+                  );
+              }*/
+            }
+            break;
+        default:
+          return res.status(403).send({ 
+            success: false, 
+            message: 'Unknown command.' 
+          });
+      }
+    });
   });
 
   // delete game
@@ -337,7 +361,7 @@ var apiRoutes = express.Router();
       if (err) 
         return res.status(403).send({ 
           success: false, 
-          message: 'User not deleted: an error occurs.' 
+          message: 'User not deleted: an error occured.' 
         });
       res.json({
         success: true,
@@ -366,7 +390,7 @@ var apiRoutes = express.Router();
         if (err) 
           return res.status(403).send({ 
             success: false, 
-            message: 'User not updated: an error occurs.' 
+            message: 'User not updated: an error occured.' 
           });
         if (result && result.ok===1 && result.n===1 /*&& result.nModified===1*/)
           return res.send({ 
@@ -384,7 +408,7 @@ var apiRoutes = express.Router();
       if (err)
         return res.status(403).send({ 
           success: false, 
-          message: 'User not updated: an error occurs.'
+          message: 'User not updated: an error occured.'
         });
       if (user) {
         if (user._id == req.decoded.$__.scope._id)
